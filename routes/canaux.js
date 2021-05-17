@@ -13,7 +13,7 @@ const getCanaux = (request, response) => {
       if (error) {
           throw error
       }
-      console.log({"canaux":results.rows});
+      //console.log({"canaux":results.rows});
       response.status(200).json({"canaux":results.rows})
   })
 }
