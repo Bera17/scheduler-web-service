@@ -9,23 +9,25 @@ const pool = new Pool({
 })
 
 const getRecords = (request, response) => {
-  // WHERE start >= CURRENT_DATE AND "end" < CURRENT_DATE+1
-    pool.query('SELECT * FROM "scheduler-app".records', (error, results) => {
+    let startDate = new Date(request.query.currentDay.start);
+    let endDate = new Date(request.query.currentDay.start);
+    endDate.setDate(startDate.getDate()+1);
+    
+    pool.query(`SELECT * FROM "scheduler-app".records 
+                WHERE start >= $1 AND "end" < $2 `, [startDate, endDate] ,(error, results) => {
         if (error) {
             throw error
         }
-        //
         //console.log({"records":results.rows});
         response.status(200).json({"records":results.rows})
     })
 }
 
-const {RRule, RRuleSet, rrulestr} = require('rrule');
 const createRecord = (request, response) => {
     const parsedObj = JSON.parse(request.body.models)
     const obj = parsedObj.models[0]
 
-    if(obj.recurrenceRule.length === 0){
+    if(obj.recurrenceRule.length === 0){ // S'il n'y a pas de recurrences
       const { etat, avancement, titre, canalId, start, end, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume} = obj;
       pool
         .query(`
@@ -41,16 +43,16 @@ const createRecord = (request, response) => {
     }
     else{
       let resultsRows=[];
-      createHeadRecurrenceRecord(obj, resultsRows, response);
+      createRecurrenceHeadRecord(obj, resultsRows, response);
     }
 }
 
-function createHeadRecurrenceRecord(obj, resultsRows, response){
+const rrhelper = require('../modules/recordRecurrenceHelper')
+function createRecurrenceHeadRecord(obj, resultsRows, response){
   const { etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume } = obj;
-  let startRule = getRule(start, recurrenceRule);
-  let endRule = getRule(end, recurrenceRule);
-
-  //console.log(startRule.all());
+  const {startRule, endRule} = rrhelper.checkRuleLimitTime(start, end, recurrenceRule);
+  // console.log(startRule.toString());
+  // console.log(startRule.all());
   pool
     .query(`
   INSERT INTO "scheduler-app".records 
@@ -60,12 +62,12 @@ function createHeadRecurrenceRecord(obj, resultsRows, response){
     [etat, avancement, titre, canalId, startRule.all()[0], endRule.all()[0], recurrenceRule, recurrenceException, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume])
     .then((results) => {
       resultsRows[0] = results.rows[0];
-      createRecurrenceRecords(obj, resultsRows, response, startRule, endRule, resultsRows[0].recordId);
+      createRecurrenceSeriesRecords(obj, resultsRows, response, startRule, endRule, resultsRows[0].recordId);
     })
     .catch(err => console.log("Error executing query", err.stack))
 }
 
-function createRecurrenceRecords(obj, resultsRows, response, startRule, endRule, headRecordId){
+function createRecurrenceSeriesRecords(obj, resultsRows, response, startRule, endRule, headRecordId){
   const { etat, avancement, titre, canalId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume } = obj;
   //console.log("Create recurr reco headRecordId", headRecordId);
   for(let i=1; i<startRule.all().length; i++){
@@ -87,22 +89,11 @@ function createRecurrenceRecords(obj, resultsRows, response, startRule, endRule,
   }
 }
 
-function getRule(date, recurrenceRule){
-  let ruleDate = ruleFormatDate(date);
-  return rrulestr('DTSTART:'+ruleDate+'Z\nRRULE:'+recurrenceRule)
-}
-function ruleFormatDate(date){
-  let tempDate1 = new Date(date).toISOString().split('.')[0];
-  let tempDate2 = tempDate1.replace(/-/g, '').replace(/:/g, '');
-  return tempDate2;
-}
-
 const updateRecord = (request, response) => {
     const parsedObj = JSON.parse(request.body.models)
     console.log("Update parsedObj", parsedObj.models[0]);
     const id = parseInt(parsedObj.models[0].recordId)
     const { etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, recurrenceId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume } = parsedObj.models[0]
-
     console.log("Update Id ", id);
     pool.query(
       `UPDATE "scheduler-app".records 
