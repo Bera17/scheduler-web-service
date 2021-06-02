@@ -4,6 +4,7 @@ const middlewares = require('./utils/middlewares')
 const dbRecord = require('./routes/records')
 const dbCanaux = require('./routes/canaux')
 const metaData = require('./routes/metaData')
+const user = require('./routes/user')
 var cors = require('cors')
 const bodyParser = require('body-parser')
 
@@ -22,6 +23,8 @@ app.delete('/api/records', dbRecord.deleteRecord)
 app.get('/api/canaux', dbCanaux.getCanaux)
 
 app.get('/api/metadata', metaData.getMeta)
+
+app.post('/api/login', user.getLogin);
 
 app.use(middlewares.errorHandler)
 
