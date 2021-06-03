@@ -10,16 +10,24 @@ module.exports = function(app) {
         next();
     });
 
-    app.get('/api/records', 
-    [authJwt.verifyToken], controller.getRecords)
+    app.get('/api/records', controller.getRecords)
 
-    app.post('/api/records', 
-    [authJwt.verifyToken], controller.createRecord)
+    app.post('/api/records', controller.createRecord)
 
-    app.put('/api/records', 
-    [authJwt.verifyToken], controller.updateRecord)
+    app.put('/api/records', controller.updateRecord)
 
-    app.delete('/api/records', 
-    [authJwt.verifyToken], controller.deleteRecord)
+    app.delete('/api/records', controller.deleteRecord)
+
+    // app.get('/api/records', 
+    // [authJwt.verifyToken], controller.getRecords)
+
+    // app.post('/api/records', 
+    // [authJwt.verifyToken], controller.createRecord)
+
+    // app.put('/api/records', 
+    // [authJwt.verifyToken], controller.updateRecord)
+
+    // app.delete('/api/records', 
+    // [authJwt.verifyToken], controller.deleteRecord)
 
 };

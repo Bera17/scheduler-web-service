@@ -14,11 +14,11 @@ app.use(morgan.logger)
 const db = require("./models");
 db.sequelize.sync()
 
-app.get('/api/records', dbRecord.getRecords)
-app.post('/api/records', dbRecord.createRecord)
-app.put('/api/records', dbRecord.updateRecord)
-app.delete('/api/records', dbRecord.deleteRecord)
-//require('./routes/records.routes')(app);
+// app.get('/api/records', dbRecord.getRecords)
+// app.post('/api/records', dbRecord.createRecord)
+// app.put('/api/records', dbRecord.updateRecord)
+// app.delete('/api/records', dbRecord.deleteRecord)
+require('./routes/records.routes')(app);
 
 //app.get('/api/canaux', dbCanaux.getCanaux)
 require('./routes/canaux.routes')(app);

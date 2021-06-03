@@ -73,7 +73,7 @@ function createRecurrenceSeriesRecords(obj, resultsRows, response, startRule, en
       .then((results)=>{
           resultsRows[i] = results.rows[0];
           if(i === startRule.all().length-1){
-            console.log("records results ", resultsRows);
+            //console.log("records results ", resultsRows);
             response.status(201).send({"records": resultsRows})
           }
       })
@@ -105,7 +105,7 @@ const updateRecord = (request, response) => {
 const deleteRecord = (request, response) => {
     const parsedObj = JSON.parse(request.body.models)
     const id = parseInt(parsedObj.models[0].recordId)
-
+    
     pool.query('DELETE FROM "scheduler-app".records WHERE "recordId" = $1', [id], (error, results) => {
       if (error) {
         throw error
