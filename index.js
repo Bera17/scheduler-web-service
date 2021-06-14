@@ -1,5 +1,7 @@
 const {PORT} = require('./utils/config')
 const express = require('express')
+const fs = require("fs")
+const https = require('https')
 const {morgan} = require('./middleware/index')
 var cors = require('cors')
 const bodyParser = require('body-parser')
@@ -23,6 +25,10 @@ require('./routes/auth.routes')(app);
 
 app.use(morgan.errorHandler)
 
-app.listen(PORT, () => {
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
