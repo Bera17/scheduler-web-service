@@ -1,5 +1,7 @@
 const {PORT} = require('./utils/config')
 const express = require('express')
+const fs = require("fs")
+const https = require('https')
 const middlewares = require('./utils/middlewares')
 const dbRecord = require('./routes/records')
 const dbCanaux = require('./routes/canaux')
@@ -12,7 +14,6 @@ app.use(bodyParser.urlencoded({extended:true}))
 app.use(cors())
 app.use(express.json())
 app.use(middlewares.logger)
-app.use(middlewares.attachCurrentuser)
 
 app.get('/api/records', dbRecord.getRecords)
 app.post('/api/records', dbRecord.createRecord)
@@ -25,6 +26,10 @@ app.get('/api/metadata', metaData.getMeta)
 
 app.use(middlewares.errorHandler)
 
-app.listen(PORT, () => {
+https.createServer({
+    key: fs.readFileSync('server.key'),
+    cert: fs.readFileSync('server.cert')
+  }, app)
+  .listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
