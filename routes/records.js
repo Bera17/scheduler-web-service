@@ -50,12 +50,12 @@ const createRecord = (request, response) => {
 const updateRecord = (request, response) => {
   const parsedObj = JSON.parse(request.body.models)
   //console.log("UpdateRecord parsedObj", parsedObj.models);
-  const { etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, recurrenceId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume } = parsedObj.models[0];
+  const {recordId, etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, recurrenceId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume } = parsedObj.models[0];
   pool.query(
     `UPDATE "scheduler-app".records 
     SET etat=$1, avancement=$2, titre=$3, "canalId"=$4, start=$5, "end"=$6, "recurrenceRule"=$7, "recurrenceException"=$8, "recurrenceId"=$9, source=$10, "isAdobe"=$11, "isWeb"=$12, "isAvide"=$13, "isArchive"=$14, "isDiffusion"=$15, "restrictionId"=$16, "descrRestriction"=$17, "bcTypeId"=$18, "bcUmid"=$19, "bcTitle"=$20, "bcMemo"=$21, "purgeDate"=$22, "padId"=$23, asset=$24, demandeur=$25, "serieId"=$26, commentaire=$27, resume=$28
     WHERE "recordId"=$29`,
-    [etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, recurrenceId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume, id],
+    [etat, avancement, titre, canalId, start, end, recurrenceRule, recurrenceException, recurrenceId, source, isAdobe, isWeb, isAvide, isArchive, isDiffusion, restrictionId, descrRestriction, bcTypeId, bcUmid, bcTitle, bcMemo, purgeDate, padId, asset, demandeur, serieId, commentaire, resume, recordId],
     (error, results) => {
       if (error) {
         throw error
